@@ -5,11 +5,11 @@
 // 职工类型枚举
 enum EmployeeType {
     TEACHER = 1,           // 教师
-    LAB_STAFF = 2,         // 实验员
-    ADMIN = 3,             // 行政人员
-    TEACHER_LAB = 4,       // 教师兼职实验员
-    ADMIN_TEACHER = 5      // 行政人员兼职教师
-};
+    LAB_STAFF,         // 实验员
+    ADMIN,             // 行政人员
+    TEACHER_LAB,       // 教师兼职实验员
+    ADMIN_TEACHER      // 行政人员兼职教师
+    };
 
 // 职工信息结构体
 typedef struct Employee {
@@ -18,7 +18,7 @@ typedef struct Employee {
     int type;              // 职工类型
     int workload;          // 上学期工作量
     double salary;         // 总工资
-    struct Employee* next; // 指向下一个职工的指针
+    struct Employee* next; // 指向下一个职工的指针（链表结构）
 } Employee;
 
 // 全局链表头指针
@@ -49,7 +49,7 @@ int main() {
     printf("========================================\n\n");
 
     while (1) {
-        showMenu();
+        showMenu();// 显示菜单
         printf("请输入选项: ");
         scanf("%d", &choice);
         getchar(); // 清除缓冲区的换行符
@@ -100,13 +100,13 @@ void showMenu() {
 // 根据职工类型获取基本工作量
 int getWorkloadLimit(int type) {
     switch (type) {
-        case TEACHER:
-        case TEACHER_LAB:
+        case 1:
+        case 4:
             return 120; // 教师基本工作量120
-        case LAB_STAFF:
+        case 2:
             return 70;  // 实验员基本工作量70
-        case ADMIN:
-        case ADMIN_TEACHER:
+        case 3:
+        case 5:
             return 0;   // 行政人员无基本工作量
         default:
             return 0;
@@ -121,30 +121,30 @@ double calculateSalary(int type, int workload) {
     int baseWorkload = 0;       // 基本工作量
 
     switch (type) {
-        case TEACHER: // 教师：基本工资 + 课时费
+        case 1: // 教师：基本工资 + 课时费
             baseSalary = 800;
             baseWorkload = 120;
             classHourFee = (workload - baseWorkload) * 20;
             return baseSalary + classHourFee;
 
-        case LAB_STAFF: // 实验员：基本工资 + 实验室补助
+        case 2: // 实验员：基本工资 + 实验室补助
             baseSalary = 650;
             allowance = 150; // 实验室补助
             return baseSalary + allowance;
 
-        case ADMIN: // 行政人员：基本工资 + 行政补贴
+        case 3: // 行政人员：基本工资 + 行政补贴
             baseSalary = 750;
             allowance = 250; // 行政补贴
             return baseSalary + allowance;
 
-        case TEACHER_LAB: // 教师兼职实验员：基本工资 + 课时费 + 实验室补助
+        case 4: // 教师兼职实验员：基本工资 + 课时费 + 实验室补助
             baseSalary = 800;
             baseWorkload = 120;
             classHourFee = (workload - baseWorkload) * 20;
             allowance = 150; // 实验室补助
             return baseSalary + classHourFee + allowance;
 
-        case ADMIN_TEACHER: // 行政人员兼职教师：基本工资 + 行政补贴 + 课时费
+        case 5: // 行政人员兼职教师：基本工资 + 行政补贴 + 课时费
             baseSalary = 750;
             baseWorkload = 120; // 兼职教师按教师标准
             classHourFee = (workload - baseWorkload) * 20;
@@ -158,7 +158,7 @@ double calculateSalary(int type, int workload) {
 
 // 添加职工信息
 void addEmployee() {
-    Employee* newEmployee = (Employee*)malloc(sizeof(Employee));
+    Employee* newEmployee = (Employee*)malloc(sizeof(Employee));// 为新职工分配内存
     if (newEmployee == NULL) {
         printf("\n[错误] 内存分配失败！\n\n");
         return;
@@ -230,8 +230,8 @@ void addEmployee() {
     newEmployee->salary = calculateSalary(newEmployee->type, newEmployee->workload);
 
     // 插入链表头部
-    newEmployee->next = head;
-    head = newEmployee;
+    newEmployee->next = head;//新职工的下一位指针存入当前队首地址
+    head = newEmployee;//新职工成为新的队首
 
     printf("\n[成功] 职工信息录入成功！\n");
     printf("工号: %s\n", newEmployee->id);
@@ -388,7 +388,7 @@ void displayAll() {
 
 // 保存到文件
 void saveToFile() {
-    FILE* file = fopen("D:\\claude_project\\高校工资管理\\employees.txt", "w");
+    FILE* file = fopen("employees.txt", "w");// 保存到当前目录下的 employees.txt 文件
     if (file == NULL) {
         printf("\n[错误] 无法创建文件！\n\n");
         return;
@@ -411,7 +411,7 @@ void saveToFile() {
 
 // 从文件加载
 void loadFromFile() {
-    FILE* file = fopen("D:\\claude_project\\高校工资管理\\employees.txt", "r");
+    FILE* file = fopen("employees.txt", "r");
     if (file == NULL) {
         // 文件不存在是正常情况，首次运行时
         return;
